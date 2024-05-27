@@ -4,6 +4,16 @@ version = "0.1.0"
 authors = ["José Augusto S. de Moura <josemoura212@gmail.com>"]
 edition = "2021"
 
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "zero2prod"
+
 [dependencies]
 actix-web = "4.5.1"
 tokio = {version = "1.37.0",features = ["macros", "rt-multi-thread"]}
+
+[dev-dependencies]
+reqwest = "0.12.4"
