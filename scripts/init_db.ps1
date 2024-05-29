@@ -1,9 +1,9 @@
-if (!(Get-Command psql -ErrorAction SilentlyContinue)) {
-    Write-Host "Error: psql is not installed."
-    exit 1
-}
-
 # Check if sqlx is installed
+# if (!(Get-Command psql -ErrorAction SilentlyContinue)) {
+#     Write-Host "Error: psql is not installed."
+#     exit 1
+# }
+
 if (!(Get-Command sqlx -ErrorAction SilentlyContinue)) {
     Write-Host "Error: sqlx is not installed."
     Write-Host "Use:"
@@ -25,31 +25,30 @@ $DB_PORT = if ($env:POSTGRES_PORT) { $env:POSTGRES_PORT } else { '5432' }
 $DB_VOLUME_PATH = "C:/path/to/your/volume"
 
 $env:DATABASE_URL = "postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
+$env:PGPASSWORD = "${DB_PASSWORD}"
 
 # Launch postgres using Docker
-docker run `
---name postgres_zero2prod `
--e POSTGRES_USER=$DB_USER `
--e POSTGRES_PASSWORD=$DB_PASSWORD `
--e POSTGRES_DB=$DB_NAME `
--p "${DB_PORT}:5432" `
--v "postgres_zero2prod:/var/lib/postgresql/data" `
--d postgres `
-postgres -N 1000
 
-# Keep pinging Postgres until it's ready to accept commands
-# $env:PGPASSWORD = "${DB_PASSWORD}"
-# do {
-#     try {
-#         psql -h "localhost" -U "${DB_USER}" -p "${DB_PORT}" -d "postgres" -c '\q'
-#         $connected = $true
-#     } catch {
-#         Write-Host "Postgres is still unavailable - sleeping"
-#         Start-Sleep -Seconds 1
-#     }
-# } until ($connected)
+if (-not ${env:SKIP_DOCKER}) {
+    docker run `
+    --name postgres_zero2prod `
+    -e POSTGRES_USER=$DB_USER `
+    -e POSTGRES_PASSWORD=$DB_PASSWORD `
+    -e POSTGRES_DB=$DB_NAME `
+    -p "${DB_PORT}:5432" `
+    -d postgres `
+    postgres -N 1000
+}
 
-# Write-Host "Postgres is up and running on port ${DB_PORT}!"
+$env:PGPASSWORD = "$DB_PASSWORD"
+# while (!(psql -h "localhost" -U "$DB_USER" -p "$DB_PORT" -d "postgres" -c '\q')) {
+#     Write-Host "Postgres is still unavailable - sleeping"
+#     Start-Sleep -s 1
+# }
+
+Write-Host "Postgres is up and running on port $DB_PORT - running migrations now!"
 
 # sqlx database create
-sqlx migrate add create_subscriptions_table
+# sqlx migrate add create_subscriptions_table
+sqlx migrate run
+Write-Host "O Postgres foi migrado, pronto para ser usado!" 

@@ -9,6 +9,7 @@ async fn health_check() -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
+#[allow(unused)]
 #[derive(serde::Deserialize)]
 pub struct FormData {
     email: String,
