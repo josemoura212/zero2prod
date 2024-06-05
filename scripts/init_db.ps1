@@ -21,9 +21,6 @@ $DB_NAME = if ($env:POSTGRES_DB) { $env:POSTGRES_DB } else { 'newsletter' }
 # Check if a custom port has been set, otherwise default to '5432'
 $DB_PORT = if ($env:POSTGRES_PORT) { $env:POSTGRES_PORT } else { '5432' }
 
-# Define the volume path on the host
-$DB_VOLUME_PATH = "C:/path/to/your/volume"
-
 $env:DATABASE_URL = "postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
 $env:PGPASSWORD = "${DB_PASSWORD}"
 
