@@ -1,10 +1,10 @@
 use std::net::TcpListener;
 
-use sqlx::{Connection, PgConnection, PgPool};
 use sqlx::Executor;
+use sqlx::{Connection, PgConnection, PgPool};
 use uuid::Uuid;
 
-use zero2prod::configuration::{DatabaseSettings, get_configuration};
+use zero2prod::configuration::{get_configuration, DatabaseSettings};
 
 pub struct TestApp {
     pub address: String,
@@ -23,7 +23,7 @@ async fn spawn_app() -> TestApp {
 
     let server =
         zero2prod::startup::run(listener, connection_pool.clone()).expect("Failed to bind address");
-        let _ = tokio::spawn(server);
+    let _ = tokio::spawn(server);
 
     TestApp {
         address,
