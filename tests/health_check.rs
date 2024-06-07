@@ -1,14 +1,17 @@
-use sqlx::Executor;
-use sqlx::{Connection, PgConnection, PgPool};
 use std::net::TcpListener;
+
+use sqlx::{Connection, PgConnection, PgPool};
+use sqlx::Executor;
 use uuid::Uuid;
-use zero2prod::configuration::{get_configuration, DatabaseSettings};
+
+use zero2prod::configuration::{DatabaseSettings, get_configuration};
 
 pub struct TestApp {
     pub address: String,
     pub db_pool: PgPool,
 }
 
+#[warn(clippy::let_underscore_future)]
 async fn spawn_app() -> TestApp {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
     let port = listener.local_addr().unwrap().port();
@@ -20,7 +23,7 @@ async fn spawn_app() -> TestApp {
 
     let server =
         zero2prod::startup::run(listener, connection_pool.clone()).expect("Failed to bind address");
-    let _ = tokio::spawn(server);
+        let _ = tokio::spawn(server);
 
     TestApp {
         address,
