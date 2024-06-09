@@ -14,6 +14,11 @@ async fn main() -> std::io::Result<()> {
     let connection_pool = PgPool::connect_lazy(&configuration.database.connection_string())
         .expect("Failed to connect to Postgres.");
 
+    //todo - implements error
+    // let connection_pool = PgPoolOptions::new()
+    //     .connect_timeout(std::time::Duration::from_secs(2))
+    //     .connect_lazy(&configuration.database.connection_string());
+
     let address = format!(
         "{}:{}",
         configuration.application.host, configuration.application.port
