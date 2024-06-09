@@ -1,8 +1,7 @@
-// use std::fs::Metadata;
-
 pub mod configuration;
 pub mod routes;
 pub mod startup;
+pub mod telemetry;
 
 // A trait encapsulating the operations required of a logger.
 // pub trait Log: Sync + Send {
