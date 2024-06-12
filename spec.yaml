@@ -1,5 +1,5 @@
 name: zero2prod
-region: fra
+region: sfo
 services:
   - name: zero2prod
     dockerfile_path: Dockerfile
@@ -34,10 +34,9 @@ services:
       - key: APP_DATABASE__DATABASE_NAME
         scope: RUN_TIME
         value: ${newsletter.DATABASE}
-
 databases:
   - engine: PG
     name: newsletter
     num_nodes: 1
     size: db-s-dev-database
-    version: "12"
+    version: "14"
