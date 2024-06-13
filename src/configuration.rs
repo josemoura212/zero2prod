@@ -4,10 +4,26 @@ use sqlx::postgres::{PgConnectOptions, PgSslMode};
 use sqlx::ConnectOptions;
 use std::convert::{TryFrom, TryInto};
 
+use crate::domain::SubscriberEmail;
+
 #[derive(serde::Deserialize)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
+    pub email_client: EmailClientSettings,
+}
+
+#[derive(serde::Deserialize)]
+pub struct EmailClientSettings {
+    pub base_url: String,
+    pub sender_email: String,
+    pub authorization_token: Secret<String>,
+}
+
+impl EmailClientSettings {
+    pub fn sender(&self) -> Result<SubscriberEmail, String> {
+        SubscriberEmail::parse(self.sender_email.clone())
+    }
 }
 
 #[derive(serde::Deserialize)]
@@ -55,10 +71,12 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         fn try_from(config: config::Config) -> Result<Self, Self::Error> {
             let database = config.get::<DatabaseSettings>("database")?;
             let application = config.get::<ApplicationSettings>("application")?;
+            let email_client = config.get::<EmailClientSettings>("email_client")?;
 
             Ok(Settings {
                 database,
                 application,
+                email_client,
             })
         }
     }
