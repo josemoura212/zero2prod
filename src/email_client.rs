@@ -29,34 +29,7 @@ impl EmailClient {
         subject: &str,
         html_content: &str,
         text_content: &str,
-    ) -> Result<(), String> {
-        // curl "https://api.postmarkapp.com/email" \
-        // -X POST \
-        // -H "Accept: application/json" \
-        // -H "Content-Type: application/json" \
-        // -H "X-Postmark-Server-Token: token do servidor" \
-        // -d '{
-        // "From": "sender@example.com",
-        // "To": "receiver@example.com",
-        // "Subject": "Postmark test",
-        // "TextBody": "Olá caro usuário do Postmark.",
-        // "HtmlBody": "<html><body><strong>Olá</strong> caro usuário do Postmark.</body></html>"
-        // }'
-
-        // HTTP/1.1 200 OK
-        // Content-Type: application/json
-        // {
-        // "To": "receiver@example.com",
-        // "SubmittedAt": "2021-01-12T07:25:01.4178645-05:00",
-        // "MessageID": "0a129aee-e1cd-480d-b08d-4f48548ff48d",
-        // "ErrorCode": 0,
-        // "Message" (Mensagem): "OK"
-        // }
-
-        // Você pode fazer melhor usando `reqwest::Url::join` se você alterar
-        // O tipo do `base_url` de `String` para `reqwest::Url`.
-        // Deixarei isso como um exercício para o leitor!
-
+    ) -> Result<(), reqwest::Error> {
         let url = format!("{}/email", self.base_url);
         let request_body = SendEmailRequest {
             from: self.sender.as_ref().to_owned(),
@@ -66,14 +39,15 @@ impl EmailClient {
             text_body: text_content.to_owned(),
         };
 
-        let _ = self
-            .http_client
+        self.http_client
             .post(url)
             .header(
                 "X-Postmark-Server-Token",
                 self.authorization_token.expose_secret(),
             )
-            .json(&request_body);
+            .json(&request_body)
+            .send()
+            .await?;
 
         Ok(())
     }
@@ -96,8 +70,22 @@ mod tests {
     use fake::faker::lorem::en::{Paragraph, Sentence};
     use fake::{Fake, Faker};
     use secrecy::Secret;
-    use wiremock::matchers::any;
+    use wiremock::matchers::{header, header_exists, method, path};
+    use wiremock::Request;
     use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    struct SendEmailBodyMatcher;
+
+    impl wiremock::Match for SendEmailBodyMatcher {
+        fn matches(&self, request: &Request) -> bool {
+            let body: serde_json::Value = serde_json::from_slice(&request.body()).unwrap();
+            body.get("from").is_some()
+                && body.get("to").is_some()
+                && body.get("subject").is_some()
+                && body.get("html_body").is_some()
+                && body.get("text_body").is_some()
+        }
+    }
 
     #[tokio::test]
     async fn send_email_fires_a_request_to_base_url() {
@@ -106,7 +94,10 @@ mod tests {
         let sender = SubscriberEmail::parse(SafeEmail().fake()).unwrap();
         let email_client = EmailClient::new(mock_server.uri(), sender, Secret::new(Faker.fake()));
 
-        Mock::given(any())
+        Mock::given(header_exists("X-Postmark-Server-Token"))
+            .and(header("Content-Type", "application/json"))
+            .and(path("/email"))
+            .and(method("POST"))
             .respond_with(ResponseTemplate::new(200))
             .expect(1)
             .mount(&mock_server)
