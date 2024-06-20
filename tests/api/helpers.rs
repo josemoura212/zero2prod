@@ -6,6 +6,7 @@ use zero2prod::configuration::{get_configuration, DatabaseSettings};
 use zero2prod::startup::{get_connection_pool, Application};
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
 
+// Ensure that the `tracing` stack is only initialised once using `once_cell`
 static TRACING: Lazy<()> = Lazy::new(|| {
     let default_filter_level = "info".to_string();
     let subscriber_name = "test".to_string();
@@ -20,6 +21,7 @@ static TRACING: Lazy<()> = Lazy::new(|| {
 
 pub struct TestApp {
     pub address: String,
+    pub port: u16,
     pub db_pool: PgPool,
     pub email_server: MockServer,
 }
@@ -36,34 +38,37 @@ impl TestApp {
     }
 }
 
-#[warn(clippy::let_underscore_future)]
 pub async fn spawn_app() -> TestApp {
     Lazy::force(&TRACING);
 
+    // Launch a mock server to stand in for Postmark's API
     let email_server = MockServer::start().await;
 
+    // Randomise configuration to ensure test isolation
     let configuration = {
         let mut c = get_configuration().expect("Failed to read configuration.");
-
+        // Use a different database for each test case
         c.database.database_name = Uuid::new_v4().to_string();
+        // Use a random OS port
         c.application.port = 0;
-
+        // Use the mock server as email API
         c.email_client.base_url = email_server.uri();
         c
     };
 
+    // Create and migrate the database
     configure_database(&configuration.database).await;
 
+    // Launch the application as a background task
     let application = Application::build(configuration.clone())
         .await
-        .expect("Failed to build application");
-
-    let address = format!("http://127.0.0.1:{}", application.port());
-
+        .expect("Failed to build application.");
+    let application_port = application.port();
     let _ = tokio::spawn(application.run_until_stopped());
 
     TestApp {
-        address,
+        address: format!("http://localhost:{}", application_port),
+        port: application_port,
         db_pool: get_connection_pool(&configuration.database),
         email_server,
     }
