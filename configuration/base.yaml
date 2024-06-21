@@ -7,7 +7,7 @@ database:
   password: "password"
   database_name: "newsletter"
 email_client:
-  base_url: "localhost"
-  sender_email: "test@gmail.com"
-  authorization_token: "my-secret-token"
+  base_url: "https://api.postmarkapp.com"
+  sender_email: "support@mangatrix.net"
+  authorization_token: "4c2aee3d-5374-49c0-9faf-56d98c28ca64"
   timeout_milliseconds: 10000
