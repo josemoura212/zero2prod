@@ -9,5 +9,5 @@ database:
 email_client:
   base_url: "https://api.postmarkapp.com"
   sender_email: "support@mangatrix.net"
-  authorization_token: "4c2aee3d-5374-49c0-9faf-56d98c28ca64"
+  authorization_token: "my-token-postmark"
   timeout_milliseconds: 10000
