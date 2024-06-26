@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT email \n        FROM subscriptions \n        WHERE status='confirmed'\n        ",
+  "query": "\n        SELECT email\n        FROM subscriptions\n        WHERE status = 'confirmed'\n        ",
   "describe": {
     "columns": [
       {
@@ -16,5 +16,5 @@
       false
     ]
   },
-  "hash": "daf5183139367ceb8fa640d3625630e96fcbef9919ee6f1602bb0c545cbeb06e"
+  "hash": "7b57e2776a245ba1602f638121550485e2219a6ccaaa62b5ec3e4683e33a3b5f"
 }
