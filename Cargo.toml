@@ -13,19 +13,17 @@ name = "zero2prod"
 
 [dependencies]
 actix-web = "4.5.1"
+actix-web-flash-messages = { version = "0.4.2", features = ["cookies"] }
 anyhow = "1.0.86"
 argon2 = { version = "0.5.3", features = ["std"] }
 base64 = "0.22.1"
 chrono = "0.4.38"
 config = "0.14.0"
-hex = "0.4.3"
-hmac = { version = "0.12.1", features = ["std"] }
 htmlescape = "0.3.1"
 rand = { version = "0.8.5", features = ["std_rng"] }
 secrecy = { version = "0.8.0", features = ["serde"] }
 serde = { version = "1.0.203", features = ["derive"] }
 serde-aux = "4.5.0"
-sha2 = "0.10.8"
 thiserror = "1.0.61"
 tokio = {version = "1.37.0",features = ["macros", "rt-multi-thread"]}
 tracing = { version = "0.1.40", features = ["log"] }
