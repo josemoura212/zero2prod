@@ -20,7 +20,7 @@ static TRACING: Lazy<()> = Lazy::new(|| {
     } else {
         let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::sink);
         init_subscriber(subscriber);
-    };
+    }
 });
 
 pub struct TestApp {
@@ -77,6 +77,21 @@ impl TestUser {
 }
 
 impl TestApp {
+    pub async fn post_login<Body>(&self, body: &Body) -> reqwest::Response
+    where
+        Body: serde::Serialize,
+    {
+        reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .unwrap()
+            .post(&format!("{}/login", &self.address))
+            .form(body)
+            .send()
+            .await
+            .expect("Failed to execute request.")
+    }
+
     pub async fn post_subscriptions(&self, body: String) -> reqwest::Response {
         reqwest::Client::new()
             .post(&format!("{}/subscriptions", &self.address))
@@ -118,14 +133,6 @@ impl TestApp {
         let plain_text = get_link(&body["TextBody"].as_str().unwrap());
         ConfirmationLinks { html, plain_text }
     }
-
-    // pub async fn test_user(&self) -> (String, String) {
-    //     let row = sqlx::query!("SELECT username, password FROM users LIMIT 1",)
-    //         .fetch_one(&self.db_pool)
-    //         .await
-    //         .expect("Failed to create test users.");
-    //     (row.username, row.password)
-    // }
 }
 
 pub async fn spawn_app() -> TestApp {
