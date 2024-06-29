@@ -11,6 +11,7 @@ pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
     pub email_client: EmailClientSettings,
+    pub redis_uri: Secret<String>,
 }
 
 #[derive(serde::Deserialize, Clone)]
@@ -78,11 +79,13 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
             let database = config.get::<DatabaseSettings>("database")?;
             let application = config.get::<ApplicationSettings>("application")?;
             let email_client = config.get::<EmailClientSettings>("email_client")?;
+            let redis_uri = config.get::<Secret<String>>("redis_uri")?;
 
             Ok(Settings {
                 database,
                 application,
                 email_client,
+                redis_uri,
             })
         }
     }
