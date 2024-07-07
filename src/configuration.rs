@@ -116,7 +116,6 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
     settings.try_into()
 }
 
-/// The possible runtime environment for our application.
 pub enum Environment {
     Local,
     Production,
