@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO idempotency (\n                user_id,\n                idempotency_key,\n                response_status_code,\n                response_headers,\n                response_body,\n                created_at)\n            VALUES ($1, $2, $3, $4, $5, now())\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int2",
+        {
+          "Custom": {
+            "name": "_header_pair",
+            "kind": {
+              "Array": {
+                "Custom": {
+                  "name": "header_pair",
+                  "kind": {
+                    "Composite": [
+                      [
+                        "name",
+                        "Text"
+                      ],
+                      [
+                        "value",
+                        "Bytea"
+                      ]
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1b980e7318c3449d5570064e1a0b996d0dd7dd2cb030623fbeb9f90bbeca2eba"
+}
